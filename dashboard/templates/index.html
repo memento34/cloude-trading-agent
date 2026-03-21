@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🤖 Multi-Agent Trading Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { background: #0d1117; color: #e6edf3; font-family: 'Segoe UI', monospace; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; }
+  .card-header { background: #21262d; border-bottom: 1px solid #30363d; font-weight: 600; }
+  .badge-active   { background: #238636; }
+  .badge-frozen   { background: #9e6a03; }
+  .badge-eliminated { background: #da3633; }
+  .pnl-positive { color: #3fb950; font-weight: bold; }
+  .pnl-negative { color: #f85149; font-weight: bold; }
+  .pnl-zero     { color: #8b949e; }
+  .signal-row { font-size: 0.82rem; border-bottom: 1px solid #21262d; padding: 4px 0; }
+  .rank-1 { border-left: 3px solid gold; }
+  .rank-2 { border-left: 3px solid silver; }
+  .rank-3 { border-left: 3px solid #cd7f32; }
+  .system-paused { background: #da3633; padding: 8px 16px; border-radius: 6px; font-weight: bold; }
+  .system-ok     { background: #238636; padding: 8px 16px; border-radius: 6px; font-weight: bold; }
+  #last-update   { font-size: 0.75rem; color: #8b949e; }
+  .table { color: #e6edf3; }
+  .table-dark { --bs-table-bg: #161b22; --bs-table-border-color: #30363d; }
+  .regime-badge { font-size: 0.9rem; padding: 4px 10px; border-radius: 20px; }
+  .regime-TRENDING_BULL  { background: #1a4731; color: #3fb950; }
+  .regime-TRENDING_BEAR  { background: #3d1a1a; color: #f85149; }
+  .regime-RANGE          { background: #1c2a40; color: #58a6ff; }
+  .regime-VOLATILE       { background: #3d2a00; color: #ffa657; }
+  .regime-ANY            { background: #21262d; color: #8b949e; }
+  .ticker { font-family: monospace; font-size: 0.85rem; }
+  .progress { height: 6px; background: #21262d; }
+</style>
+</head>
+<body>
+<div class="container-fluid py-3">
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="mb-0">🤖 Multi-Agent Trading System</h4>
+      <small class="text-muted">OKX Paper Trading · Top 50 Coins</small>
+    </div>
+    <div class="text-end">
+      <span id="system-status" class="system-ok">● SİSTEM ÇALIŞIYOR</span>
+      <div id="last-update" class="mt-1">Son güncelleme: —</div>
+    </div>
+  </div>
+
+  <!-- ÖZET KARTLAR -->
+  <div class="row g-3 mb-3" id="summary-cards">
+    <div class="col-6 col-md-3">
+      <div class="card p-3 text-center">
+        <div class="text-muted small">Toplam Portföy</div>
+        <div class="h4 mb-0" id="total-equity">$—</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-3 text-center">
+        <div class="text-muted small">Toplam P&L</div>
+        <div class="h4 mb-0" id="total-pnl">$—</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-3 text-center">
+        <div class="text-muted small">Aktif Agentlar</div>
+        <div class="h4 mb-0" id="active-agents">—</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-3 text-center">
+        <div class="text-muted small">Piyasa Rejimi</div>
+        <div class="mt-1" id="market-regime"><span class="regime-badge regime-ANY">ANY</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+
+    <!-- AGENT SIRALAMASI -->
+    <div class="col-12 col-lg-7">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between">
+          <span>🏆 Agent Sıralaması</span>
+          <small class="text-muted">Canlı performans</small>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-dark table-hover mb-0 small">
+            <thead>
+              <tr>
+                <th>#</th><th>Agent</th><th>Durum</th>
+                <th>Bakiye</th><th>P&L %</th><th>Win%</th>
+                <th>İşlem</th><th>Skor</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <tr><td colspan="8" class="text-center text-muted py-3">Yükleniyor...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SON SİNYALLER -->
+    <div class="col-12 col-lg-5">
+      <div class="card">
+        <div class="card-header">📡 Son Sinyaller</div>
+        <div class="card-body p-2" style="max-height: 340px; overflow-y: auto;" id="signals-container">
+          <div class="text-muted text-center py-3">Sinyal bekleniyor...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AÇIK POZİSYONLAR -->
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">📊 Açık Pozisyonlar</div>
+        <div class="card-body p-0">
+          <table class="table table-dark table-hover mb-0 small">
+            <thead>
+              <tr><th>Agent</th><th>Coin</th><th>Yön</th><th>Giriş</th><th>TP</th><th>SL</th><th>Boyut</th><th>Açılış</th></tr>
+            </thead>
+            <tbody id="positions-body">
+              <tr><td colspan="8" class="text-center text-muted py-3">Açık pozisyon yok</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SON İŞLEMLER -->
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">📜 Son Kapanan İşlemler</div>
+        <div class="card-body p-0">
+          <table class="table table-dark table-hover mb-0 small">
+            <thead>
+              <tr><th>Agent</th><th>Coin</th><th>Yön</th><th>Giriş</th><th>Çıkış</th><th>P&L $</th><th>Sebep</th><th>Tarih</th></tr>
+            </thead>
+            <tbody id="trades-body">
+              <tr><td colspan="8" class="text-center text-muted py-3">Henüz işlem yok</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ELEME LOGU -->
+    <div class="col-12 col-md-6">
+      <div class="card">
+        <div class="card-header">⚖️ Eleme Logu</div>
+        <div class="card-body p-2" style="max-height: 200px; overflow-y: auto;" id="elim-log">
+          <div class="text-muted small text-center py-2">Henüz eleme yok</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RİSK DURUMU -->
+    <div class="col-12 col-md-6">
+      <div class="card">
+        <div class="card-header">🛡️ Risk Durumu</div>
+        <div class="card-body" id="risk-status">
+          <div class="text-muted small">Yükleniyor...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function pnlClass(val) {
+  if (val > 0) return "pnl-positive";
+  if (val < 0) return "pnl-negative";
+  return "pnl-zero";
+}
+function pnlStr(val) {
+  const s = val >= 0 ? "+" : "";
+  return `${s}${parseFloat(val).toFixed(2)}`;
+}
+function statusBadge(a) {
+  if (a.is_eliminated) return '<span class="badge badge-eliminated">ELİNDİ</span>';
+  if (a.is_frozen)     return '<span class="badge badge-frozen">DONDURULDU</span>';
+  return '<span class="badge badge-active">AKTİF</span>';
+}
+
+async function refresh() {
+  try {
+    const r = await fetch("/api/status");
+    const d = await r.json();
+
+    document.getElementById("last-update").textContent =
+      "Son: " + new Date().toLocaleTimeString("tr-TR");
+
+    // System status
+    const sysEl = document.getElementById("system-status");
+    if (d.risk && (d.risk.trading_paused || d.risk.emergency_stop)) {
+      sysEl.className = "system-paused";
+      sysEl.textContent = "⚠️ " + (d.risk.pause_reason || "DURAKLATILDI");
+    } else {
+      sysEl.className = "system-ok";
+      sysEl.textContent = "● SİSTEM ÇALIŞIYOR";
+    }
+
+    // Özet
+    if (d.leaderboard && d.leaderboard.length > 0) {
+      const totalEquity = d.leaderboard.reduce((s, a) => s + (a.equity || 0), 0);
+      const totalPnl    = d.leaderboard.reduce((s, a) => s + (a.total_pnl || 0), 0);
+      const active      = d.leaderboard.filter(a => !a.is_eliminated && !a.is_frozen).length;
+      document.getElementById("total-equity").innerHTML =
+        `<span class="${pnlClass(totalEquity - d.leaderboard.length * (d.leaderboard[0]?.initial_balance||500))}">$${totalEquity.toFixed(0)}</span>`;
+      document.getElementById("total-pnl").innerHTML =
+        `<span class="${pnlClass(totalPnl)}">${pnlStr(totalPnl)}</span>`;
+      document.getElementById("active-agents").textContent = `${active}/${d.leaderboard.length}`;
+    }
+
+    // Regime
+    if (d.regime) {
+      const r = d.regime.regime || "ANY";
+      document.getElementById("market-regime").innerHTML =
+        `<span class="regime-badge regime-${r}">${r.replace("_"," ")}</span>`;
+    }
+
+    // Leaderboard
+    if (d.leaderboard) {
+      let html = "";
+      d.leaderboard.forEach((a, i) => {
+        const rank = i + 1;
+        const cls  = rank <= 3 ? `rank-${rank}` : "";
+        html += `<tr class="${cls}">
+          <td>${rank <= 3 ? ["🥇","🥈","🥉"][rank-1] : rank}</td>
+          <td>${a.agent_id}</td>
+          <td>${statusBadge(a)}</td>
+          <td class="ticker">$${(a.balance||0).toFixed(2)}</td>
+          <td class="${pnlClass(a.pnl_pct)}">${pnlStr(a.pnl_pct)}%</td>
+          <td>${(a.win_rate||0).toFixed(0)}%</td>
+          <td>${a.total_trades||0} (${a.open_positions||0} açık)</td>
+          <td><strong>${(a.score||0).toFixed(1)}</strong></td>
+        </tr>`;
+      });
+      document.getElementById("leaderboard-body").innerHTML = html || '<tr><td colspan="8" class="text-center text-muted">Veri yok</td></tr>';
+    }
+
+    // Sinyaller
+    if (d.signals) {
+      const sig_icons = {"BUY":"🟢","SELL":"🔴","HYPE_ALERT":"🔥","FEAR_GREED":"🌡️","default":"📡"};
+      let html = d.signals.slice(-30).reverse().map(s => {
+        const icon = sig_icons[s.signal] || sig_icons.default;
+        const t = s.timestamp ? s.timestamp.split("T")[1]?.slice(0,8) : "";
+        return `<div class="signal-row">
+          ${icon} <strong>${s.coin}</strong>
+          <span class="badge bg-secondary ms-1">${s.source}</span>
+          <span class="ms-1">${s.signal}</span>
+          <span class="text-muted ms-1">${(s.strength*100||0).toFixed(0)}%</span>
+          <span class="text-muted float-end">${t}</span>
+          <div class="text-muted" style="font-size:0.75rem">${s.reason||""}</div>
+        </div>`;
+      }).join("") || '<div class="text-muted text-center py-2">Sinyal yok</div>';
+      document.getElementById("signals-container").innerHTML = html;
+    }
+
+    // Açık pozisyonlar
+    if (d.positions) {
+      if (d.positions.length === 0) {
+        document.getElementById("positions-body").innerHTML =
+          '<tr><td colspan="8" class="text-center text-muted py-3">Açık pozisyon yok</td></tr>';
+      } else {
+        let html = d.positions.map(p =>
+          `<tr>
+            <td>${p.agent_id}</td>
+            <td><strong>${p.coin}</strong></td>
+            <td><span class="badge ${p.side==='long'?'bg-success':'bg-danger'}">${p.side.toUpperCase()}</span></td>
+            <td class="ticker">${parseFloat(p.entry_price).toFixed(4)}</td>
+            <td class="pnl-positive ticker">${parseFloat(p.take_profit_price).toFixed(4)}</td>
+            <td class="pnl-negative ticker">${parseFloat(p.stop_loss_price).toFixed(4)}</td>
+            <td>$${parseFloat(p.size_usd).toFixed(2)}</td>
+            <td class="text-muted">${p.opened_at?.split("T")[1]?.slice(0,8)||""}</td>
+          </tr>`).join("");
+        document.getElementById("positions-body").innerHTML = html;
+      }
+    }
+
+    // Son işlemler
+    if (d.recent_trades) {
+      if (d.recent_trades.length === 0) {
+        document.getElementById("trades-body").innerHTML =
+          '<tr><td colspan="8" class="text-center text-muted py-3">Henüz işlem yok</td></tr>';
+      } else {
+        let html = d.recent_trades.slice(-20).reverse().map(t =>
+          `<tr>
+            <td>${t.agent_id}</td>
+            <td><strong>${t.coin}</strong></td>
+            <td><span class="badge ${t.side==='long'?'bg-success':'bg-danger'}">${(t.side||"").toUpperCase()}</span></td>
+            <td class="ticker">${parseFloat(t.entry_price||0).toFixed(4)}</td>
+            <td class="ticker">${parseFloat(t.close_price||0).toFixed(4)}</td>
+            <td class="${pnlClass(t.pnl)}">${pnlStr(t.pnl)}</td>
+            <td><span class="badge ${t.status==='take_profit'?'bg-success':'bg-danger'}">${t.status||""}</span></td>
+            <td class="text-muted">${t.closed_at?.split("T")[1]?.slice(0,8)||""}</td>
+          </tr>`).join("");
+        document.getElementById("trades-body").innerHTML = html;
+      }
+    }
+
+    // Eleme logu
+    if (d.elimination_log) {
+      let html = d.elimination_log.slice(-10).reverse().map(e =>
+        `<div class="signal-row small">${e.time?.split("T")[1]?.slice(0,8)||""} — ${e.event}</div>`
+      ).join("") || '<div class="text-muted small text-center py-2">Henüz eleme yok</div>';
+      document.getElementById("elim-log").innerHTML = html;
+    }
+
+    // Risk durumu
+    if (d.risk) {
+      let html = `
+        <div class="row g-2 small">
+          <div class="col-6">Günlük Kayıp: <span class="${pnlClass(-(d.risk.daily_system_loss||0))}">$${(d.risk.daily_system_loss||0).toFixed(2)}</span></div>
+          <div class="col-6">BTC: <span class="ticker">$${(d.risk.last_btc_price||0).toFixed(0)}</span></div>
+        </div>
+        <div class="mt-2 small">Aktif Coinler: ${Object.entries(d.risk.active_coins||{}).map(([c,n])=>`${c}(${n})`).join(", ")||"—"}</div>
+      `;
+      document.getElementById("risk-status").innerHTML = html;
+    }
+
+  } catch(e) {
+    console.error("Dashboard güncelleme hatası:", e);
+  }
+}
+
+refresh();
+setInterval(refresh, 15000); // Her 15 saniyede güncelle
+</script>
+</body>
+</html>
