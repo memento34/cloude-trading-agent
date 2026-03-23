@@ -1,1 +1,1 @@
-web: gunicorn main:flask_app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+web: gunicorn -w 1 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:$PORT app:app

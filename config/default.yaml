@@ -1,0 +1,83 @@
+seed: 42
+benchmark_symbol: BTC-USDT-SWAP
+symbols:
+  - BTC-USDT-SWAP
+  - ETH-USDT-SWAP
+  - SOL-USDT-SWAP
+interval: 1h
+
+portfolio:
+  starting_equity: 100000.0
+  fee_bps: 4.0
+  slippage_bps: 5.0  # FIX: base slippage raised; engine scales dynamically with vol
+  max_positions: 8
+  max_gross_exposure: 2.2
+  max_symbol_exposure: 0.14
+  max_cluster_exposure: 0.42
+  max_leverage: 2.2
+  risk_per_trade: 0.0045
+  cooldown_bars: 2
+  max_holding_bars: 120
+  trailing_atr_mult: 1.7
+  stop_atr_mult: 2.0
+  take_profit_rr: 2.6
+  correlation_lookback: 72
+  correlation_threshold: 0.72
+
+ensemble:
+  entry_threshold: 0.16
+  exit_threshold: 0.03
+  allow_long: true
+  allow_short: true
+  sleeves:
+    trend:
+      enabled: true
+      weight: 0.42
+      ema_fast: 21
+      ema_slow: 84
+      momentum_window: 20
+      strength_threshold: 0.001
+    mean_reversion:
+      enabled: true
+      weight: 0.12
+      lookback: 40
+      z_entry: 1.8
+      z_exit: 0.5
+      rsi_window: 14
+      rsi_oversold: 33
+      rsi_overbought: 67
+    breakout:
+      enabled: true
+      weight: 0.28
+      channel_window: 30
+      volume_window: 20
+      volume_z_threshold: 0.5
+      atr_expansion_threshold: 0.0
+    pullback:
+      enabled: true
+      weight: 0.18
+      ema_fast: 20
+      ema_slow: 50
+      pullback_window: 8
+      reentry_rsi: 52
+
+regime:
+  fast: 50
+  slow: 200
+  vol_window: 30
+  vol_cutoff: 0.035
+
+walkforward:
+  train_bars: 480
+  test_bars: 160
+  step_bars: 160
+  optimizer_candidates: 16
+  validation_split: 0.25
+
+continuous_optimization:
+  enabled: true
+  reopt_every_bars: 160
+  rolling_lookback_bars: 480
+  min_improvement: 0.04
+  drawdown_trigger: 0.08
+  candidates: 6

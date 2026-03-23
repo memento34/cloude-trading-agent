@@ -1,0 +1,38 @@
+{
+  "selection_mode": "explicit_symbols",
+  "target_size": 3,
+  "selected_count": 3,
+  "updated_at": "2026-03-23T18:06:54.246875+00:00",
+  "symbols": [
+    "BTC-USDT-SWAP",
+    "ETH-USDT-SWAP",
+    "SOL-USDT-SWAP"
+  ],
+  "members": [
+    {
+      "rank": 1,
+      "instId": "BTC-USDT-SWAP",
+      "volCcy24h": null,
+      "last": null
+    },
+    {
+      "rank": 2,
+      "instId": "ETH-USDT-SWAP",
+      "volCcy24h": null,
+      "last": null
+    },
+    {
+      "rank": 3,
+      "instId": "SOL-USDT-SWAP",
+      "volCcy24h": null,
+      "last": null
+    }
+  ],
+  "loaded_symbols": [
+    "BTC-USDT-SWAP",
+    "ETH-USDT-SWAP",
+    "SOL-USDT-SWAP"
+  ],
+  "load_errors": {},
+  "loaded_count": 3
+}

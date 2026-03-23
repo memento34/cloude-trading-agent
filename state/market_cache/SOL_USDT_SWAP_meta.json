@@ -1,0 +1,8 @@
+{
+  "inst_id": "SOL-USDT-SWAP",
+  "bars": 1800,
+  "updated_at": "2026-03-23T18:06:54.246369+00:00",
+  "bar": "1H",
+  "source": "csv_or_cache",
+  "errors": []
+}

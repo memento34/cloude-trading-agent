@@ -1,0 +1,91 @@
+{
+  "seed": 42,
+  "benchmark_symbol": "BTCUSDT",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT"
+  ],
+  "interval": "1h",
+  "portfolio": {
+    "starting_equity": 100000.0,
+    "fee_bps": 4.0,
+    "slippage_bps": 2.5,
+    "max_positions": 4,
+    "max_gross_exposure": 2.0,
+    "max_symbol_exposure": 0.65,
+    "max_cluster_exposure": 1.15,
+    "max_leverage": 2.0,
+    "risk_per_trade": 0.006,
+    "cooldown_bars": 3,
+    "max_holding_bars": 140,
+    "trailing_atr_mult": 1.8,
+    "stop_atr_mult": 2.2,
+    "take_profit_rr": 3.0,
+    "correlation_lookback": 72,
+    "correlation_threshold": 0.75
+  },
+  "ensemble": {
+    "entry_threshold": 0.12,
+    "exit_threshold": 0.02,
+    "allow_long": true,
+    "allow_short": true,
+    "sleeves": {
+      "trend": {
+        "enabled": true,
+        "weight": 0.55,
+        "ema_fast": 21,
+        "ema_slow": 84,
+        "momentum_window": 20,
+        "strength_threshold": 0.001
+      },
+      "mean_reversion": {
+        "enabled": true,
+        "weight": 0.0,
+        "lookback": 40,
+        "z_entry": 1.8,
+        "z_exit": 0.5,
+        "rsi_window": 14,
+        "rsi_oversold": 33,
+        "rsi_overbought": 67
+      },
+      "breakout": {
+        "enabled": true,
+        "weight": 0.25,
+        "channel_window": 30,
+        "volume_window": 20,
+        "volume_z_threshold": 0.5,
+        "atr_expansion_threshold": 0.0
+      },
+      "pullback": {
+        "enabled": true,
+        "weight": 0.2,
+        "ema_fast": 20,
+        "ema_slow": 50,
+        "pullback_window": 8,
+        "reentry_rsi": 52
+      }
+    }
+  },
+  "regime": {
+    "fast": 50,
+    "slow": 200,
+    "vol_window": 30,
+    "vol_cutoff": 0.035
+  },
+  "walkforward": {
+    "train_bars": 720,
+    "test_bars": 240,
+    "step_bars": 240,
+    "optimizer_candidates": 8,
+    "validation_split": 0.25
+  },
+  "continuous_optimization": {
+    "enabled": true,
+    "reopt_every_bars": 240,
+    "rolling_lookback_bars": 720,
+    "min_improvement": 0.04,
+    "drawdown_trigger": 0.08,
+    "candidates": 4
+  }
+}

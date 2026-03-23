@@ -1,0 +1,13 @@
+{
+  "final_equity": 102995.1278,
+  "total_return_pct": 2.9951,
+  "max_drawdown_pct": 8.9886,
+  "sharpe": 0.8294,
+  "sortino": 0.9779,
+  "profit_factor": 1.6488,
+  "win_rate_pct": 42.6829,
+  "trade_count": 164,
+  "avg_trade_return_pct": 0.3121,
+  "expectancy": 106.2067,
+  "calmar": 2.5116
+}

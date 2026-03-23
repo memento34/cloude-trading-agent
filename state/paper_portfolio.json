@@ -1,0 +1,49 @@
+{
+  "cash": 100000.0,
+  "positions": {
+    "ETH-USDT-SWAP": {
+      "symbol": "ETH-USDT-SWAP",
+      "side": -1,
+      "qty": 3.22626693251152,
+      "entry_price": 4339.380557423859,
+      "entry_time": "2024-03-15 23:00:00+00:00",
+      "stop_price": 4416.503696351503,
+      "take_profit_price": 4138.860396211983,
+      "trail_price": 4408.791382458739,
+      "peak_price": 4339.380557423859,
+      "trough_price": 4339.380557423859,
+      "bars_held": 0,
+      "exchange_order_id": ""
+    },
+    "SOL-USDT-SWAP": {
+      "symbol": "SOL-USDT-SWAP",
+      "side": -1,
+      "qty": 95.15258567695581,
+      "entry_price": 147.1321026160043,
+      "entry_time": "2024-03-15 23:00:00+00:00",
+      "stop_price": 149.9904011367558,
+      "take_profit_price": 139.70052646205036,
+      "trail_price": 149.70457128468064,
+      "peak_price": 147.1321026160043,
+      "trough_price": 147.1321026160043,
+      "bars_held": 0,
+      "exchange_order_id": ""
+    },
+    "BTC-USDT-SWAP": {
+      "symbol": "BTC-USDT-SWAP",
+      "side": -1,
+      "qty": 0.2084127094906787,
+      "entry_price": 67174.40617807502,
+      "entry_time": "2024-03-15 23:00:00+00:00",
+      "stop_price": 68379.29878695364,
+      "take_profit_price": 64041.68539499061,
+      "trail_price": 68258.80952606577,
+      "peak_price": 67174.40617807502,
+      "trough_price": 67174.40617807502,
+      "bars_held": 0,
+      "exchange_order_id": ""
+    }
+  },
+  "trades": [],
+  "updated_at": "2026-03-23T18:06:54.417407+00:00"
+}
